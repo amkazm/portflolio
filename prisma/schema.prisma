@@ -1,0 +1,146 @@
+// Prisma schema for Amin Kazempour portfolio.
+// Local dev uses postgresql. To switch to PostgreSQL: change `provider` to
+// "postgresql" and set DATABASE_URL accordingly, then run `prisma db push`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+// Singleton profile (id is always "profile").
+model Profile {
+  id             String   @id @default("profile")
+  name           String   @default("Amin Kazempour")
+  title          String   @default("AI Engineer & Machine Learning Researcher")
+  tagline        String   @default("")
+  bio            String   @default("")
+  cvUrl          String   @default("/cv/Amin-Kazempour-CV.pdf")
+  email          String   @default("am.kazempour@gmail.com")
+  linkedinUrl    String   @default("")
+  githubUrl      String   @default("")
+  scholarUrl     String   @default("")
+  researchGate   String   @default("")
+  twitterUrl     String   @default("")
+  // Thesis highlight
+  thesisTitle    String   @default("")
+  thesisSummary  String   @default("")
+  thesisPdfUrl   String   @default("")
+  updatedAt      DateTime @updatedAt
+}
+
+model Publication {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  authors        String
+  venue          String
+  year           Int
+  // One of: JOURNAL | CONFERENCE | PREPRINT (validated in Zod; SQLite has no enums)
+  type           String   @default("JOURNAL")
+  shortAbstract  String   @default("")
+  fullAbstract   String   @default("")
+  contributions  String   @default("")
+  methods        String   @default("")
+  results        String   @default("")
+  tags           String   @default("") // comma-separated
+  scholarUrl     String   @default("")
+  researchGate   String   @default("")
+  doi            String   @default("")
+  pdfUrl         String   @default("")
+  citation       String   @default("")
+  featured       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([type])
+  @@index([year])
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  category     String   @default("AI Projects")
+  summary      String   @default("")
+  problem      String   @default("")
+  solution     String   @default("")
+  techStack    String   @default("") // comma-separated
+  architecture String   @default("")
+  challenges   String   @default("")
+  results      String   @default("")
+  demoUrl      String   @default("")
+  githubUrl    String   @default("")
+  coverImage   String   @default("")
+  images       String   @default("") // comma-separated URLs
+  featured     Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category])
+}
+
+model Experience {
+  id           String    @id @default(cuid())
+  role         String
+  organization String
+  location     String    @default("")
+  startDate    String    @default("") // e.g. "2023-09"
+  endDate      String    @default("") // empty = Present
+  summary      String    @default("")
+  achievements String    @default("") // newline-separated
+  order        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  date        DateTime @default(now())
+  tags        String   @default("") // comma-separated
+  excerpt     String   @default("")
+  content     String   @default("") // markdown / mdx
+  coverImage  String   @default("")
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SkillCategory {
+  id     String  @id @default(cuid())
+  name   String
+  order  Int     @default(0)
+  skills Skill[]
+}
+
+model Skill {
+  id         String        @id @default(cuid())
+  name       String
+  level      Int           @default(80) // 0-100
+  icon       String        @default("")
+  order      Int           @default(0)
+  category   SkillCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
